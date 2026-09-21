@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoireBox — The flight recorder for AI agents</title>
+<meta name="description" content="Every decision your AI agent makes — sealed in a tamper-evident journal, timestamped by an external witness, provable by anyone. Without trusting anyone.">
+<link rel="stylesheet" href="style.css?v=25">
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<nav class="nav">
+  <a class="brand" href="#top"><span class="brand-cube"></span>NOIREBOX</a>
+  <div class="nav-links">
+    <a href="#core">The journal</a>
+    <a href="#plugin">Guardrail</a>
+    <a href="#witness">Witness</a>
+    <a href="#proof">Proof</a>
+    <a href="#api">API</a>
+    <a href="https://github.com/slabbdev/noirebox" target="_blank" class="nav-github">★ GitHub</a>
+    <a href="fr.html" class="nav-flag" title="Version française" lang="fr">🇫🇷</a>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO — the face of the flight recorder ═══════════════ -->
+<header class="hero" id="top">
+  <div class="stripes" aria-hidden="true"><i></i><i></i></div>
+
+  <div class="hero-inner">
+    <p class="kicker">// NOIREBOX — THE FLIGHT RECORDER FOR AI AGENTS</p>
+    <div class="hero-title-row">
+      <span class="hero-brand-stamp" aria-hidden="true">NOIREBOX</span>
+      <h1>FLIGHT<span class="h1-white">DATA</span><br>RECORDER</h1>
+    </div>
+
+    <p class="pitch">Every AI decision, <strong>sealed forever.</strong></p>
+    <p class="hero-sub">
+      Immutable, tamper-evident journaling for AI agents.
+      Hash-chained. Signed. Timestamped by an external witness.
+      Verifiable offline — without trusting anyone.
+    </p>
+
+    <div class="gh-badges">
+      <span class="gh-badge"><i>GDPR</i><b>ready</b></span>
+      <span class="gh-badge"><i>AI ACT</i><b>art. 12</b></span>
+      <span class="gh-badge"><i>made in</i><b>🇫🇷 Vosges, France</b></span>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-light" href="https://github.com/slabbdev/noirebox#quickstart" target="_blank">Start free — self-host</a>
+      <a class="btn btn-ghost-dark" href="#proof">See the proof ↓</a>
+    </div>
+
+    <ul class="stats">
+      <li><strong>91</strong><span>tests green</span></li>
+      <li><strong>0</strong><span>runtime deps</span></li>
+      <li><strong>0.21 ms</strong><span>overhead per event</span></li>
+      <li><strong>1.5 MB</strong><span>whole footprint</span></li>
+    </ul>
+
+    <div class="install-pill">
+      <code id="install-cmd">git clone https://github.com/slabbdev/noirebox &amp;&amp; cd noirebox &amp;&amp; ./start.sh</code>
+      <button class="copy-btn" id="copy-install" title="Copy to clipboard" aria-label="Copy install command">⧉</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ TICKER ═══════════════ -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="ticker"></div>
+</div>
+
+<!-- ═══════════════ 01 CORE ═══════════════ -->
+<section class="section reveal" id="core">
+  <div class="wrap">
+    <p class="kicker">01 · THE CORE</p>
+    <h2>One journal.<br><span class="grad">Nothing else matters. </span>🤘</h2>
+    <p class="lede">
+      The journal is the product: hash-chained, signed, append-only, anchored to an
+      external witness. It doesn't know what an agent is — an event is a type and a
+      payload. That's why it fits <em>every</em> agent, every stack, every language.
+    </p>
+    <div class="chain">
+      <div class="link ok"><span>#1</span><code>prev 000…0</code><code>5a5cb5a2…</code></div>
+      <div class="chain-arrow">→</div>
+      <div class="link ok"><span>#2</span><code>prev 5a5cb5a2…</code><code>b3fe86ad…</code></div>
+      <div class="chain-arrow">→</div>
+      <div class="link bad"><span>#3 ✗</span><code>content rewritten</code><code>hash mismatch</code></div>
+      <div class="chain-arrow">→</div>
+      <div class="link dim"><span>#4</span><code>prev ?</code><code>chain broken</code></div>
+    </div>
+    <div class="pipeline" aria-label="How a decision becomes proof">
+      <span class="pl-step">AI decision</span>
+      <span class="pl-arrow">→</span>
+      <span class="pl-step">SHA-256</span>
+      <span class="pl-arrow">→</span>
+      <span class="pl-step">Ed25519</span>
+      <span class="pl-arrow">→</span>
+      <span class="pl-step">TSA · RFC 3161</span>
+      <span class="pl-arrow">→</span>
+      <span class="pl-step ok">✓ immutable record</span>
+    </div>
+    <div class="grid-3">
+      <div class="card"><h3>Hash-chained</h3><p>Every event commits to the previous one. Insert, delete or rewrite — detected, and located to the exact event.</p></div>
+      <div class="card"><h3>Signed</h3><p>Ed25519 seals from a key that never leaves your infrastructure. A forged journal — even perfectly re-chained — fails.</p></div>
+      <div class="card"><h3>Append-only</h3><p>SQLite with no UPDATE, no DELETE. Writing is the only operation that exists. Signed events at 0.21 ms apiece.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 02 PLUGIN ═══════════════ -->
+<section class="section alt reveal" id="plugin">
+  <div class="wrap">
+    <p class="kicker">02 · GUARDRAILS</p>
+    <h2>Prevention is pluggable.<br><span class="grad">Proof is universal.</span></h2>
+    <p class="lede">
+      Already running Lakera, Llama Guard, your own LLM-judge or your own regexes?
+      <strong>Keep them.</strong> A guardrail is just one event source — journal its
+      verdicts and its catches become tamper-evident instead of living in rewritable logs.
+    </p>
+    <div class="sources">
+      <div class="source"><span class="dot g"></span><div><strong>Your guardrail</strong><em>its verdicts, as events</em></div></div>
+      <div class="source"><span class="dot g"></span><div><strong>Your agent</strong><em>llm_call · llm_output · eval</em></div></div>
+      <div class="source"><span class="dot r"></span><div><strong>Bundled plugin</strong><em>regex + 250 KB ML, fr &amp; en</em></div></div>
+    </div>
+    <div class="plug-flow" aria-label="Drop-in integration">
+      <span class="pf-chip">OpenAI</span>
+      <span class="pf-chip">Claude</span>
+      <span class="pf-chip">LangGraph</span>
+      <span class="pf-chip">CrewAI</span>
+      <span class="pf-chip">Custom agent</span>
+      <span class="pf-arrow">→</span>
+      <span class="pf-chip hot">NoireBox</span>
+      <span class="pf-arrow">→</span>
+      <span class="pf-chip ok">Immutable audit trail</span>
+    </div>
+    <p class="note mono">No model lock-in. No infrastructure rewrite. One SDK.</p>
+    <p class="note">The detector we ship is a working example of the plugin contract — swappable by design
+      (<a href="https://github.com/slabbdev/noirebox/blob/main/docs/ADRs.md">ADR 003</a>: Meta's Prompt Guard evaluated and declined, integration path documented).</p>
+  </div>
+</section>
+
+<!-- ═══════════════ 03 WITNESS ═══════════════ -->
+<section class="section reveal" id="witness">
+  <div class="wrap">
+    <p class="kicker">03 · THE OUTSIDE WITNESS</p>
+    <h2>Sealed at T. time ☕<br><span class="grad">The past is read-only.</span></h2>
+    <p class="lede">
+      A journal that dates itself proves nothing — that's the suspect writing its own report.
+      RFC 3161 anchoring lets an external Timestamp Authority sign <em>"I received hash X at
+      time T"</em>. Only a 32-byte hash ever leaves. A regenerated journal shows a head the old
+      token doesn't cover — and a backdated token is arithmetically impossible.
+    </p>
+    <div class="steps">
+      <div class="step"><span>1</span><div><strong>Hash</strong><em>only the head, never the data</em></div></div>
+      <div class="step"><span>2</span><div><strong>TSA signs</strong><em>« hash X received at time T »</em></div></div>
+      <div class="step"><span>3</span><div><strong>Sealed back</strong><em>the token becomes an event itself</em></div></div>
+    </div>
+    <p class="big-line">One seal for the whole fleet. <span class="grad">Certificate Transparency, for AI agents.</span></p>
+    <p class="note">Fleet anchoring: the heads of N journals form a Merkle tree — a single TSA seal covers them all, and each box proves its place with ~11 hashes, verified offline. To our knowledge, no other agent-audit tool does this. <code>make demo-fleet</code></p>
+    <p class="note mono">make tsa → local OpenSSL witness, own key chain, 0 €, works offline. Or point NOIREBOX_TSA_URL at any qualified TSA.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ 04 WHY NOW ═══════════════ -->
+<section class="section alt reveal" id="whynow">
+  <div class="wrap">
+    <p class="kicker">04 · WHY NOW</p>
+    <h2>AI decides faster than<br><span class="grad">you can audit it.</span></h2>
+    <p class="lede">When something goes wrong — an incident, a dispute, a regulator — six questions decide everything:</p>
+    <div class="why-grid">
+      <div class="why-q">What did the agent <strong>see</strong>?</div>
+      <div class="why-q">What did it <strong>decide</strong>?</div>
+      <div class="why-q">Which <strong>model version</strong> ran?</div>
+      <div class="why-q">Which <strong>tools</strong> did it call?</div>
+      <div class="why-q">What changed <strong>since</strong>?</div>
+      <div class="why-q">Was the log <strong>modified afterwards</strong>?</div>
+    </div>
+    <p class="big-line">NoireBox answers all six. <span class="grad">Cryptographically.</span></p>
+  </div>
+</section>
+
+<!-- ═══════════════ 05 MEASURED ═══════════════ -->
+<section class="section reveal" id="measured">
+  <div class="wrap">
+    <p class="kicker">05 · MEASURED, NOT CLAIMED</p>
+    <h2>Numbers we can reproduce.<br><span class="grad">Not numbers we feel.</span></h2>
+    <p class="lede">
+      Every metric below is reproducible from the repo — <code>make test</code>,
+      <code>make train</code>, the benchmark commands in the specs. A metric we
+      can't reproduce means <em>unknown</em>, not a rounder number.
+    </p>
+    <table class="metrics">
+      <tr><th>Metric</th><th>Value</th><th>Reproduce with</th></tr>
+      <tr><td>Sealed event — hash + Ed25519 + SQLite commit</td><td class="m-val">0.21 ms</td><td class="m-how">docs/SPECS.md §6</td></tr>
+      <tr><td>Guardrail scan, regex engine (7 lines)</td><td class="m-val">0.23 ms</td><td class="m-how">docs/SPECS.md §6</td></tr>
+      <tr><td>Guardrail scan, ML engine (7 lines)</td><td class="m-val">10.4 ms</td><td class="m-how">docs/SPECS.md §6</td></tr>
+      <tr><td>Full chain verification, 100 events</td><td class="m-val">22 ms</td><td class="m-how">verifier/verifier.py, any export</td></tr>
+      <tr><td>Bundled detectors, FR + EN</td><td class="m-val">293 + 243 KB</td><td class="m-how">make train · make train-en</td></tr>
+      <tr><td>Held-out attack sentences, FR + EN</td><td class="m-val">12/12</td><td class="m-how">tests/test_ml_guardrail.py</td></tr>
+      <tr><td>Test suite, re-run on every push</td><td class="m-val">91 green</td><td class="m-how">.github/workflows/ci.yml</td></tr>
+    </table>
+    <p class="note mono">Measured on an M-series MacBook, September 2026. One number, one command — if a future release can't reproduce one, the table gets corrected, not inflated.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ 06 PROOF ═══════════════ -->
+<section class="section reveal" id="proof">
+  <div class="wrap">
+    <p class="kicker">06 · THE PROOF</p>
+    <h2>One file. One command.<br><span class="grad">Zero trust.</span></h2>
+    <p class="lede">
+      An auditor, a DPO, a client — receives the full dossier and recomputes the truth locally.
+      No API to trust, no dashboard to believe. Arithmetic doesn't lie.
+    </p>
+    <div class="terminal">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">auditor@third-party — no credentials</span></div>
+      <pre id="term-out"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 07 USE CASES ═══════════════ -->
+<section class="section alt reveal" id="usecases">
+  <div class="wrap">
+    <p class="kicker">07 · WHO IT'S FOR</p>
+    <h2>Built for systems that<br><span class="grad">must explain themselves.</span></h2>
+    <div class="grid-3 uc-grid">
+      <div class="card"><h3>Finance</h3><p>Every automated decision auditable — credit scoring, trading, claims.</p></div>
+      <div class="card"><h3>Healthcare</h3><p>Trace AI-assisted decisions end to end, for patients and inspectors.</p></div>
+      <div class="card"><h3>Legal</h3><p>Preserve evidence and chain of custody for AI-produced documents.</p></div>
+      <div class="card"><h3>Enterprise AI</h3><p>Know exactly what your agents did, on which input, with which tools.</p></div>
+      <div class="card"><h3>Security</h3><p>Detect log tampering, not just failures. The journal fights back.</p></div>
+      <div class="card"><h3>Public sector</h3><p>Algorithmic transparency duties, satisfied by design.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 08 DEVELOPERS ═══════════════ -->
+<section class="section reveal" id="api">
+  <div class="wrap">
+    <p class="kicker">08 · DEVELOPERS</p>
+    <h2>An API, an SDK, a verifier.<br><span class="grad">Nothing else to learn.</span></h2>
+    <p class="lede">
+      FastAPI, 10 documented routes, interactive OpenAPI at <em>/docs</em>.
+      Record from anything that can send JSON — your agent, your CI, your cron job.
+    </p>
+    <div class="terminal">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="term-title">dev@yourstack — record &amp; prove</span></div>
+      <pre class="term-static">$ git clone https://github.com/slabbdev/noirebox &amp;&amp; cd noirebox
+$ ./start.sh                            <span class="t-dim"># tests + API on :8768 — /docs is live</span>
+
+$ curl -X POST :8768/api/v1/events \
+    -d '{"type":"llm_call","payload":{"model":"gpt-x","prompt":"…"}}'
+
+$ curl -X POST :8768/api/v1/anchors     <span class="t-dim"># seal the chain head (RFC 3161)</span>
+$ curl -s :8768/api/v1/export > export.json
+
+$ python verifier/verifier.py export.json
+<span class="t-ok">[✓] INTACT — proof, verified by anyone, offline</span></pre>
+    </div>
+    <div class="plug-flow" aria-label="Developer surface">
+      <span class="pf-chip">FastAPI</span>
+      <span class="pf-chip">OpenAPI · /docs</span>
+      <span class="pf-chip">Python SDK</span>
+      <span class="pf-chip">MCP server · 4 agent tools</span>
+      <span class="pf-chip">Docker</span>
+      <span class="pf-chip ok">10 routes</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 09 EUROPE ═══════════════ -->
+<section class="section reveal" id="europe">
+  <div class="wrap">
+    <p class="kicker">09 · EUROPE</p>
+    <h2>AI regulation is coming.<br><span class="grad">Make every decision traceable.</span></h2>
+    <p class="lede">European AI vendors must <em>prove</em> — not promise — what their systems did. NoireBox is engineered around that obligation.</p>
+    <div class="grid-4">
+      <div class="card"><h3>EU AI Act — art. 12</h3><p>Record-keeping duties for risk systems: automatic event logs, cryptographic.</p></div>
+      <div class="card"><h3>GDPR — 5(2) · 15/20</h3><p>Accountability and subject rights: signed exports, verifiable by the DPO.</p></div>
+      <div class="card"><h3>ISO 42001</h3><p>AI management systems: traceability of decisions feeds the audit directly.</p></div>
+      <div class="card"><h3>EU Data Act</h3><p>Data access and governance: portable, verifiable records by construction.</p></div>
+    </div>
+    <p class="big-line">Compliance isn't a feature. <span class="grad">It's an architectural property.</span></p>
+    <p class="note">Sovereign: self-hosted, zero telemetry, keys stay yours. Engineered in the Vosges 🇫🇷. A building block, not a certification — we state our perimeter (see the threat model) instead of overselling it.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ 10 FAQ ═══════════════ -->
+<section class="section reveal" id="faq">
+  <div class="wrap">
+    <p class="kicker">10 · BEFORE YOU BEGIN</p>
+    <h2>A few questions,<br><span class="grad">straight answers.</span></h2>
+    <details class="faq"><summary>One NoireBox per agent?</summary><p>Yes — like one flight recorder per aircraft. One instance = one SQLite file, one key pair, one chain. The fleet layer aggregates chain heads (32-byte hashes), never your events: your journal stays on your infrastructure.</p></details>
+    <details class="faq"><summary>Is this a blockchain?</summary><p>No — one issuer, one verifier. A signed local chain gives integrity and non-repudiation without paying a consensus tax. The blockchain solves a problem we don't have (ADR 001).</p></details>
+    <details class="faq"><summary>How is it different from Langfuse or Helicone?</summary><p>Those help developers debug what happened — the logs stay modifiable. NoireBox produces a dossier a third party verifies offline. Debug ≠ proof.</p></details>
+    <details class="faq"><summary>Do I have to use the bundled guardrail?</summary><p>No — it's one event source among others. Keep Lakera, Llama Guard or your own LLM-judge and journal their verdicts with a single POST. The bundled detector is a working example of the plugin contract.</p></details>
+    <details class="faq"><summary>Do I need a paid timestamp authority?</summary><p>No — <code>make tsa</code> runs a local OpenSSL witness with its own key chain: free, offline, sovereign. Pointing at any public or qualified TSA is one environment variable.</p></details>
+    <details class="faq"><summary>What does it cost?</summary><p>Core: MIT, $0 forever, verification included. Cloud: from €49/mo when it ships. Enterprise: custom — HSM custody, qualified timestamps, SLA.</p></details>
+  </div>
+</section>
+
+<!-- ═══════════════ 11 ACCESS ═══════════════ -->
+<section class="section alt reveal" id="access">
+  <div class="wrap narrow">
+    <p class="kicker">11 · START FREE</p>
+    <h2>Core is MIT.<br><span class="grad">Forever.</span></h2>
+    <p class="lede">
+      Journal, guardrail plugin, verifier — free and open, including verification.
+      A managed, EU-hosted offering is being shaped for teams who want the proof without running it.
+    </p>
+    <form class="waitlist" action="https://formspree.io/f/VOTRE_ID_FORMSPREE" method="POST">
+      <input type="email" name="email" placeholder="you@company.eu" required>
+      <button type="submit">Request early access</button>
+    </form>
+    <div class="tiers">
+      <div class="tier"><h4>Core</h4><span>$0 · MIT forever</span><p>Self-hosted. Unlimited events. Journal, plugin, verifier.</p></div>
+      <div class="tier hot"><h4>Cloud</h4><span>from €49/mo</span><p>Managed EU journal + guardrail + DPO-ready exports.</p></div>
+      <div class="tier"><h4>Enterprise</h4><span>custom</span><p>SLA, SSO, HSM key custody, qualified timestamps, compliance support.</p></div>
+    </div>
+    <p class="note">Early stage — pricing indicative, shaped with early-access partners.</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div><span class="brand-cube"></span> <strong>NoireBox</strong> — the flight recorder for AI agents.</div>
+  <div class="foot-links">
+    <a href="https://github.com/slabbdev/noirebox" target="_blank">GitHub</a>
+    <a href="https://github.com/slabbdev/noirebox/blob/main/docs/SPECS.md">Specs</a>
+    <a href="https://github.com/slabbdev/noirebox/blob/main/docs/THREAT-MODEL.md">Threat model</a>
+    <span>MIT</span>
+    <span>🇫🇷 Engineered in the Vosges</span>
+  </div>
+</footer>
+
+<script src="script.js?v=25"></script>
+</body>
+</html>

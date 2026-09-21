@@ -1,0 +1,10 @@
+services:
+  noirebox:
+    build: .
+    ports:
+      - "8768:8768"
+    volumes:
+      - ./data:/srv/data
+    environment:
+      - NOIREBOX_DB=/srv/data/noirebox.db
+    restart: unless-stopped

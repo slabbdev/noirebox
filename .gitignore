@@ -1,0 +1,27 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+
+# Runtime artifacts (database, private key) — never committed.
+# The JSONL datasets are not versioned: they are reproducible via
+# `make train` / `make train-en` (seed 42, identical bytes everywhere).
+data/*.db
+data/*.db-*
+data/*.key
+data/*.jsonl
+models/*.joblib.tmp
+export*.json
+
+# Local TSA crypto material (root + leaf + tokens)
+tsa/material/
+
+# Local scan tooling
+.mimosa/
+
+# OS / editor junk
+.DS_Store

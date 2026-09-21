@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="380" viewBox="0 0 900 380" font-family="ui-monospace, Menlo, monospace">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#57606a"/>
+    </marker>
+  </defs>
+  <style>
+    .box { fill: #ffffff; stroke: #d0d7de; stroke-width: 1.5; }
+    .plugin { fill: #fff8f5; stroke: #e10600; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .core { fill: #0d1117; stroke: #0d1117; }
+    .ext { fill: #f6f5f2; stroke: #d0d7de; stroke-width: 1.5; }
+    .t { font-size: 13px; fill: #1f2328; font-weight: bold; }
+    .s { font-size: 10.5px; fill: #57606a; }
+    .sw { font-size: 15px; fill: #ffffff; font-weight: bold; letter-spacing: .06em; }
+    .sw2 { font-size: 11px; fill: #8b949e; }
+    .flow { stroke: #57606a; stroke-width: 1.5; fill: none; marker-end: url(#ar); }
+    .tag { font-size: 10px; fill: #9a6700; }
+    .red { fill: #e10600; }
+  </style>
+
+  <!-- ── producers (left) : interchangeable event sources ── -->
+  <rect x="20" y="30" width="210" height="66" class="box" rx="10"/>
+  <text x="125" y="56" text-anchor="middle" class="t">YOUR AGENT</text>
+  <text x="125" y="74" text-anchor="middle" class="s">llm_call · llm_output · eval</text>
+
+  <rect x="20" y="130" width="210" height="66" class="plugin" rx="10"/>
+  <text x="125" y="156" text-anchor="middle" class="t">BUNDLED GUARDRAIL</text>
+  <text x="125" y="174" text-anchor="middle" class="s">regex · ML fr/en — a plugin</text>
+
+  <rect x="20" y="230" width="210" height="66" class="box" rx="10"/>
+  <text x="125" y="256" text-anchor="middle" class="t">YOUR OWN GUARDRAIL / APP</text>
+  <text x="125" y="274" text-anchor="middle" class="s">SDK · MCP · REST</text>
+
+  <text x="125" y="322" text-anchor="middle" class="s">interchangeable event sources</text>
+
+  <!-- ── the core (center) ── -->
+  <rect x="300" y="90" width="280" height="180" class="core" rx="14"/>
+  <text x="440" y="126" text-anchor="middle" class="sw">THE JOURNAL</text>
+  <text x="440" y="144" text-anchor="middle" class="red" font-size="11" font-family="ui-monospace" font-weight="bold">THE PRODUCT</text>
+  <text x="440" y="172" text-anchor="middle" class="sw2">SHA-256 chained · Ed25519 signed</text>
+  <text x="440" y="188" text-anchor="middle" class="sw2">append-only SQLite</text>
+  <text x="440" y="204" text-anchor="middle" class="sw2">any event type · any agent · any language</text>
+  <text x="440" y="228" text-anchor="middle" class="sw2">RFC 3161 anchors (external TSA)</text>
+
+  <!-- arrows producers → journal -->
+  <line x1="230" y1="63" x2="296" y2="130" class="flow"/>
+  <line x1="230" y1="163" x2="296" y2="172" class="flow"/>
+  <line x1="230" y1="263" x2="296" y2="220" class="flow"/>
+
+  <!-- ── TSA witness (bottom center) ── -->
+  <rect x="330" y="305" width="220" height="58" class="ext" rx="10"/>
+  <text x="440" y="329" text-anchor="middle" class="t">TSA — RFC 3161</text>
+  <text x="440" y="347" text-anchor="middle" class="s">outside witness · hash only</text>
+  <line x1="440" y1="270" x2="440" y2="303" class="flow"/>
+
+  <!-- ── verification (right) ── -->
+  <rect x="660" y="70" width="220" height="76" class="box" rx="10"/>
+  <text x="770" y="98" text-anchor="middle" class="t">GET /api/v1/export</text>
+  <text x="770" y="116" text-anchor="middle" class="s">events + signed attestation</text>
+  <text x="770" y="132" text-anchor="middle" class="s">+ TSA tokens</text>
+
+  <rect x="660" y="180" width="220" height="86" class="box" rx="10"/>
+  <text x="770" y="208" text-anchor="middle" class="t">THIRD-PARTY VERIFIER</text>
+  <text x="770" y="226" text-anchor="middle" class="s">one file · offline · openssl</text>
+  <text x="770" y="248" text-anchor="middle" class="s" fill="#1a7f37">exit 0 — INTACT</text>
+  <text x="770" y="262" text-anchor="middle" class="s" fill="#c93c37">exit 1 — TAMPERED (located)</text>
+
+  <line x1="580" y1="150" x2="656" y2="108" class="flow"/>
+  <line x1="770" y1="146" x2="770" y2="178" class="flow"/>
+
+  <text x="450" y="375" text-anchor="middle" class="s">Prevention is pluggable — proof is universal. Keep your guardrail: journal its verdicts.</text>
+</svg>
