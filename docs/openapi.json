@@ -1,0 +1,499 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NoireBox",
+    "description": "\nTachygraphe pour agents IA : **journal inaltérable** (SHA-256 chaîné + Ed25519),\n**garde-fou** sur les transcripts, **attestation exportable** vérifiable par un tiers.\n\nAuth (optionnelle, activée par `NOIREBOX_CLIENTS=id:secret,…`) :\n`POST /api/v1/token` → JWT 1 h → `Authorization: Bearer …`. Rate limit 60 req/min/client.\n",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/token": {
+      "post": {
+        "summary": "Token",
+        "description": "Échange client_id/client_secret contre un JWT (1 h). 401 si invalide.",
+        "operationId": "token_api_v1_token_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Token Api V1 Token Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events": {
+      "post": {
+        "summary": "Append Event",
+        "description": "Enregistre un événement (prompt, sortie LLM, éval…). Retourne 201.",
+        "operationId": "append_event_api_v1_events_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Append Event Api V1 Events Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List Events",
+        "description": "Liste paginée. `Query(ge=…, le=…)` ≈ Assert\\Range sur un paramètre.",
+        "operationId": "list_events_api_v1_events_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response List Events Api V1 Events Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verify": {
+      "get": {
+        "summary": "Verify",
+        "description": "Vérification de la chaîne sur place (diagnostic interne).",
+        "operationId": "verify_api_v1_verify_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Verify Api V1 Verify Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transcripts/scan": {
+      "post": {
+        "summary": "Scan",
+        "description": "Garde-fou : détecte les injections, journalise l'incident, 201.\n\nDeux moteurs au choix : `regex` (heuristique embarquée, défaut) ou\n`ml` (micro-modèle entraîné — 293 Ko, voir ml/train.py). Le scan ET\nsa journalisation sont dans la même requête : un incident détecté\nmais non enregistré serait une faille d'audit.",
+        "operationId": "scan_api_v1_transcripts_scan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Scan Api V1 Transcripts Scan Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attestation": {
+      "get": {
+        "summary": "Attestation",
+        "description": "Attestation signée de l'état courant (résumé seul, sans le détail).",
+        "operationId": "attestation_api_v1_attestation_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Attestation Api V1 Attestation Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attestation.pdf": {
+      "get": {
+        "summary": "Attestation Pdf Route",
+        "description": "Attestation en PDF — le document qu'un DPO classe dans un dossier.\n\nLa source de vérité reste le JSON (machine) ; le PDF est la version\npour humain, avec la marche à suivre de vérification imprimée dessus.",
+        "operationId": "attestation_pdf_route_api_v1_attestation_pdf_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/export": {
+      "get": {
+        "summary": "Export",
+        "description": "Export complet auditable : événements + attestation.\n\nC'est CE fichier que le tiers fait manger à verifier/verifier.py.",
+        "operationId": "export_api_v1_export_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Export Api V1 Export Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/anchors": {
+      "post": {
+        "summary": "Create Anchor",
+        "description": "Ancre RFC 3161 : scelle la tête de chaîne actuelle à une TSA.\n\nLa TSA (process séparé, propre clé — ou service externe configuré)\nsigne « ce head_hash existait à la date T ». L'ancre est journalisée\ncomme événement \"anchor\" : le journal scelle sa propre preuve\nextérieure, et une régénération de chaîne par un insider avec la clé\ndevient détectable (ADR 006).",
+        "operationId": "create_anchor_api_v1_anchors_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Create Anchor Api V1 Anchors Post"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attestation/verify": {
+      "post": {
+        "summary": "Verify Attestation Endpoint",
+        "description": "Vérifie une attestation soumise (cas du tiers qui n'a que le résumé).\n\n`att: dict` sans DTO : volontaire — c'est une donnée étrangère qu'on\ninspecte défensivement, pas un contrat interne.",
+        "operationId": "verify_attestation_endpoint_api_v1_attestation_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Att"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Verify Attestation Endpoint Api V1 Attestation Verify Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EventIn": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Type",
+            "examples": [
+              "llm_call"
+            ]
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "EventIn",
+        "description": "Corps attendu par POST /api/v1/events."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ScanIn": {
+        "properties": {
+          "meeting_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Meeting Id"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 200000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "engine": {
+            "type": "string",
+            "enum": [
+              "regex",
+              "ml"
+            ],
+            "title": "Engine",
+            "default": "regex"
+          },
+          "lang": {
+            "type": "string",
+            "enum": [
+              "fr",
+              "en"
+            ],
+            "title": "Lang",
+            "default": "fr"
+          }
+        },
+        "type": "object",
+        "required": [
+          "meeting_id",
+          "text"
+        ],
+        "title": "ScanIn",
+        "description": "Corps attendu par POST /api/v1/transcripts/scan."
+      },
+      "TokenIn": {
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "type": "string",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "client_id",
+          "client_secret"
+        ],
+        "title": "TokenIn",
+        "description": "Corps attendu par POST /api/v1/token (OAuth2 client-credentials maison)."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

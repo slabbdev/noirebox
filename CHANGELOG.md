@@ -1,0 +1,68 @@
+# Changelog
+
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+versioning according to [Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+### Planned
+- Local judge model (`llama-guard3:1b` via Ollama) for ambiguous cases — ADR 001 stage 2
+- Rotation of anchors across multiple TSAs (distribute trust)
+- Prometheus + Grafana metrics
+- HSM/KMS migration for the private key
+
+## [0.3.0] - 2026-09-20
+
+### Added
+- **RFC 3161 anchoring** ([ADR 006](docs/ADRs.md)): `POST /api/v1/anchors`
+  seals the current chain head with a TSA (only the hash leaves — zero data);
+  token + certificate are journaled as an `anchor` event; the third-party
+  verifier checks the anchors (`openssl ts -verify`) and reports
+  `anchors_checked` — the threat model gap for the “insider with the key” is closed
+- **Self-hosted TSA** ([ADR 007](docs/ADRs.md)): `make tsa` (OpenSSL,
+  root + leaf certificate chain, port 3318, free, offline); external/qualified
+  TSA via `NOIREBOX_TSA_URL`
+- **Fleet Merkle anchoring**: `noirebox/merkle.py` — one TSA seal covers N journals
+  (Certificate Transparency pattern); inclusion proofs are ~log2(N) hashes and are
+  verifiable offline; the full tree is journaled as a `fleet_anchor` event (the hub
+  is itself a NoireBox) — `make demo-fleet` (3 boxes, 1 seal, 1 falsification)
+- Full simplified explainer in `docs/VULGARISATION.md §9` (“dry paint” / “final layer”) — ready for infographics
+
+## [0.2.0] - 2026-09-20
+
+### Added
+- **OAuth2 (JWT bearer) + rate limiting** ([ADR 004](docs/ADRs.md)):
+  `POST /api/v1/token` (client-credentials, constant-time secret comparison),
+  1-hour HS256 JWT, protection for writes and exports — verification routes remain open by design;
+  sliding window 60 req/min/client; explicitly enabled via `NOIREBOX_CLIENTS`
+- **PDF attestation** ([ADR 005](docs/ADRs.md)): `GET /api/v1/attestation.pdf`,
+  A4 DPO-ready page with chain state, keys, and verification instructions
+
+## [0.1.0] - 2026-09-19
+
+### Added
+- **Tamper-evident journal**: chained SHA-256 hash chain + Ed25519 signatures,
+  append-only SQLite storage, local verification and full export
+  (`GET /api/v1/export`) — standalone third-party verifier (`verifier/verifier.py`,
+  exit 0/1 with exact falsification location)
+- **Signed attestation** of the current chain state (`GET /api/v1/attestation`)
+- **Dual-engine guardrail**: regex heuristics for FR (4 attack families)
+  and trained ML micro-model (TF-IDF + logistic regression, 293 KB,
+  FR dataset of 5,400 versioned examples, `make train`) — selected via
+  `engine: regex|ml`
+- **Real LLM scene** (`make demo-llm`): qwen2.5:0.5b via local Ollama,
+  attack succeeds without protection and fails with it — zero simulation
+- **MCP server** (JSON-RPC stdio, no SDK): 4 agent tools
+  (`noirebox_scan`, `noirebox_log_event`, `noirebox_verify`, `noirebox_attestation`)
+- **Client SDK** (`noirebox/client.py`) tested against a real uvicorn server
+- One-shot demos: `make demo` (model → journal → auditor → attacker),
+  `make demo-mcp`
+- **GitHub Actions CI**: retraining of the micro-model + 56 tests on every push
+- Documentation: formal spec (`docs/SPECS.md`), threat model
+  (`docs/THREAT-MODEL.md`), ADRs (`docs/ADRs.md`), full vulgarization
+  (`docs/VULGARISATION.md`)
+
+### Decisions
+- ADR 001: staged guardrail (regex → ML → LLM judge as last resort)
+- ADR 002: Llama Prompt Guard 2 (Meta) evaluated and rejected (language, binary output,
+  gated licensing, dependencies)
