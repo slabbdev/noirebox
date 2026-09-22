@@ -6,12 +6,9 @@
 
 **The black box for AI agents — tamper-evident journal, guardrails, verifiable proof.**
 
-[![CI](https://github.com/slabbdev/noirebox/actions/workflows/ci.yml/badge.svg)](https://github.com/slabbdev/noirebox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-60%20passing-brightgreen)](tests/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Lint: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Repo](https://img.shields.io/badge/repo-2%20Mo-success)](.)
 [![Made in France](https://img.shields.io/badge/made%20in-France-blue)](#)
 
 **Your AI agent writes meeting notes that bind your clients.
@@ -318,8 +315,8 @@ client against a **real uvicorn server** (ephemeral port), real LLM agent
 (skipped if Ollama is absent — never simulated), **OAuth2 JWT auth + rate
 limiting + DPO-ready PDF attestation + RFC 3161 anchoring against a real
 local TSA (incl. the insider chain-regeneration attack)**, and the full
-third-party verifier contract. GitHub Actions CI: both language models
-re-trained + full suite on every push.
+third-party verifier contract. Everything replays locally: `make test`
+re-trains both language models and runs the full suite.
 
 ## Roadmap
 

@@ -6,12 +6,9 @@
 
 **La boîte noire pour agents IA — journal inaltérable, garde-fous, preuve vérifiable.**
 
-[![CI](https://github.com/slabbdev/noirebox/actions/workflows/ci.yml/badge.svg)](https://github.com/slabbdev/noirebox/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-60%20passing-brightgreen)](tests/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Lint: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Repo](https://img.shields.io/badge/repo-1.6%20Mo-success)](.)
 [![Made in France](https://img.shields.io/badge/made%20in-France-blue)](#)
 
 **Un agent IA rédige des comptes rendus qui engagent vos clients.
@@ -324,8 +321,8 @@ serveur MCP, SDK client contre un **vrai serveur uvicorn** (port éphémère),
 agent LLM réel (skip si Ollama absent — jamais simulé), **auth OAuth2 JWT +
 rate limiting + attestation PDF DPO + ancrage RFC 3161 contre une vraie TSA
 locale (dont l'attaque de régénération par l'insider)**, et le contrat
-complet du vérificateur tiers. CI GitHub Actions : ré-entraînement des deux
-modèles linguistiques + suite complète à chaque push.
+complet du vérificateur tiers. Tout se rejoue en local : `make test`
+ré-entraîne les deux modèles linguistiques et lance la suite complète.
 
 ## Cas d'usage — n'importe quel agent qui « décide »
 
