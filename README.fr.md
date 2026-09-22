@@ -115,6 +115,13 @@ Zéro ambiguïté sur ce qu'est le produit :
 make demo           # le film complet en une commande (voir ci-dessous)
 ```
 
+Ou avec Docker — Python inutile, le moteur ML est embarqué dans l'image :
+
+```bash
+docker run -p 8768:8768 ghcr.io/slabbdev/noirebox:latest
+# API + docs OpenAPI sur http://127.0.0.1:8768/docs — données dans ./data
+```
+
 Démos sans serveur :
 
 ```bash

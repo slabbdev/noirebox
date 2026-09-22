@@ -109,6 +109,13 @@ No ambiguity about what the product is:
 make demo           # the full story in one command (see below)
 ```
 
+Or with Docker — no Python needed, the ML engine ships inside the image:
+
+```bash
+docker run -p 8768:8768 ghcr.io/slabbdev/noirebox:latest
+# API + OpenAPI docs on http://127.0.0.1:8768/docs — data persists in ./data
+```
+
 Standalone demos:
 
 ```bash
