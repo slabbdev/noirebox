@@ -353,3 +353,13 @@ domaine = ajouter des exemples au dataset et relancer `make train`.
 - [ ] Migration clé privée HSM/KMS ([threat model](docs/THREAT-MODEL.md))
 - [x] Site produit refait pour GitHub Pages — landing dark premium (face de boîtier de vol :
       bandes diagonales, fond rouge, FLIGHTDATA RECORDER) dans [`docs/`](docs/index.html)
+
+## Soutenir
+
+NoireBox est libre et MIT — vérification incluse, pour toujours. Si ça t'a
+fait gagner du temps (ou épargné un casse-tête de conformité), un café est
+la meilleure façon de le dire :
+
+<a href="https://buymeacoffee.com/samlabbe"><img src="docs/bmc_qr.png" width="160" alt="Buy Me A Coffee — scanne pour soutenir NoireBox"></a>
+
+*Scanne ou clique — [buymeacoffee.com/samlabbe](https://buymeacoffee.com/samlabbe)*

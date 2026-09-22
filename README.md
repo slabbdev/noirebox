@@ -336,6 +336,15 @@ re-trains both language models and runs the full suite.
       [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
       (enable Pages → Source: GitHub Actions)
 
+## Support
+
+NoireBox is free and MIT — verification included, forever. If it saved you
+time (or a compliance headache), a coffee is the best way to say it helps:
+
+<a href="https://buymeacoffee.com/samlabbe"><img src="docs/bmc_qr.png" width="160" alt="Buy Me A Coffee — scan to support NoireBox"></a>
+
+*Scan or click — [buymeacoffee.com/samlabbe](https://buymeacoffee.com/samlabbe)*
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
