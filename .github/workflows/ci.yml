@@ -1,8 +1,11 @@
 name: CI
+
 on:
   push:
     branches: [main]
-  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -23,6 +26,7 @@ jobs:
           python ml/gen_dataset_en.py
           python ml/train.py --lang en
         shell: bash
-      - run: pytest -q
+      - name: Full test suite
+        run: pytest -q
         env:
           NOIREBOX_DB: /tmp/ci-noirebox.db
