@@ -9,6 +9,7 @@
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Lint: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Image on GHCR](https://img.shields.io/badge/image-ghcr.io%2Fslabbdev%2Fnoirebox-blue)](https://github.com/slabbdev/noirebox/pkgs/container/noirebox)
 [![Made in France](https://img.shields.io/badge/made%20in-France-blue)](#)
 
 **Your AI agent writes meeting notes that bind your clients.
