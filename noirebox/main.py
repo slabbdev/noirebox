@@ -3,10 +3,12 @@ from __future__ import annotations
 import os
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Response
+from fastapi.responses import HTMLResponse
 
 from .attestation import build_attestation, verify_attestation
 from .auth import build_auth_dependency, issue_token
 from .chain import KeyPair, verify_chain
+from .dashboard import DASHBOARD_HTML
 from .guardrail import scan_transcript
 from .schemas import EventIn, ScanIn, TokenIn
 from .store import EventStore
@@ -78,6 +80,15 @@ def create_app(db_path: str | None = None) -> FastAPI:
     def verify() -> dict:
         """On-the-spot chain verification (internal diagnostic)."""
         return verify_chain(key.public_hex(), store.all())
+
+    @app.get("/dashboard", include_in_schema=False)
+    def dashboard() -> HTMLResponse:
+        """Read-only supervision view — renders, never mutates the journal.
+
+        The badge shows the same local recomputation the verifier performs;
+        the trust anchor remains the exported dossier (see dashboard.py).
+        """
+        return HTMLResponse(DASHBOARD_HTML)
 
     @app.post("/api/v1/transcripts/scan", status_code=201)
     def scan(body: ScanIn, client_id: str = Depends(require_auth)) -> dict:
