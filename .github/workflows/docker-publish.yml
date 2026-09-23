@@ -4,6 +4,11 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+  # Rebuild hebdomadaire : une base Docker vieillit — les patchs Debian et pip
+  # en amont ne s'appliquent qu'en reconstruisant. L'anti-fake s'applique aussi
+  # à la sécurité : on re-scanne, on ne promet pas.
+  schedule:
+    - cron: "0 6 * * 1"
 
 permissions:
   contents: read
