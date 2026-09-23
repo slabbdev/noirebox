@@ -9,7 +9,7 @@ def _version() -> str:
     try:
         return version("noirebox")
     except PackageNotFoundError:  # running from the repo without installation
-        return "0.3.0+unknown"
+        return "0.4.0+unknown"
 
 
 def main(argv: list[str] | None = None) -> int:

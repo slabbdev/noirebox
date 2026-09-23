@@ -31,7 +31,7 @@ def create_app(db_path: str | None = None) -> FastAPI:
     """
     app = FastAPI(
         title="NoireBox",
-        version="0.3.0",
+        version="0.4.0",
         description=DESCRIPTION,
     )
     path = db_path or os.environ.get("NOIREBOX_DB", "data/noirebox.db")

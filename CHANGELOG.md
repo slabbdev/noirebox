@@ -11,6 +11,28 @@ versioning according to [Semantic Versioning](https://semver.org/).
 - Prometheus + Grafana metrics
 - HSM/KMS migration for the private key
 
+## [0.4.0] - 2026-09-24
+
+### Added
+- **Reconciliation plugin v0** (issue #3, community request): `noirebox/reconcile.py` —
+  business invariants over the journal (decision ↔ outcome pairing by
+  correlation key, `within` windows), findings sealed as `reconciliation`
+  events; JSON config ([`reconciliation.example.json`](reconciliation.example.json));
+  CLI: `noirebox reconcile --config … [--journal-report] [--fail-on-findings]`
+- **Payout use-case demo**: `demo/demo_payout.py` (`make demo-payout`) —
+  an agent decides, a simulated provider responds, the two failure cases
+  (crash gap, orphan outcome) and the reconciliation report on a real chain
+- **Supervision dashboard**: `GET /dashboard` — read-only HTML view (badge
+  INTACT/TAMPERING, counters, reconciliation panel, event table), zero
+  dependencies, auto-refresh
+
+### Changed
+- **The PDF attestation becomes an optional extra**: reportlab is no longer
+  a core dependency — `pip install noirebox[pdf]`. Without it, the
+  attestation.pdf route answers 501 with the install hint
+- SDK default timeout raised 5s → 15s (cold-start ML load on fresh
+  environments, found by the stranger simulation)
+
 ## [0.3.0] - 2026-09-20
 
 ### Added
