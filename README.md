@@ -6,6 +6,7 @@
 
 **The black box for AI agents — tamper-evident journal, guardrails, verifiable proof.**
 
+[![PyPI](https://img.shields.io/pypi/v/noirebox)](https://pypi.org/project/noirebox/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Lint: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -104,6 +105,13 @@ No ambiguity about what the product is:
 > Prevention varies per stack. Proof is universal.
 
 ## Quickstart
+
+```bash
+pip install noirebox   # the ML engine ships inside the wheel (FR + EN)
+noirebox serve         # API on http://127.0.0.1:8768/docs
+```
+
+From source:
 
 ```bash
 ./start.sh          # venv + deps + tests + API on http://127.0.0.1:8768/docs

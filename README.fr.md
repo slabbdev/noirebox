@@ -6,6 +6,7 @@
 
 **La boîte noire pour agents IA — journal inaltérable, garde-fous, preuve vérifiable.**
 
+[![PyPI](https://img.shields.io/pypi/v/noirebox)](https://pypi.org/project/noirebox/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Lint: ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -110,6 +111,13 @@ Zéro ambiguïté sur ce qu'est le produit :
 > La prévention varie selon la stack. La preuve est universelle.
 
 ## Quickstart
+
+```bash
+pip install noirebox   # le moteur ML est embarqué dans le wheel (FR + EN)
+noirebox serve         # API sur http://127.0.0.1:8768/docs
+```
+
+Depuis les sources :
 
 ```bash
 ./start.sh          # venv + deps + tests + API sur http://127.0.0.1:8768/docs
