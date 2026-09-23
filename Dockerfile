@@ -1,4 +1,7 @@
 FROM python:3.12-slim
+# Lie le package GHCR au repo : sans ce label, GitHub le crée sous le compte
+# sans le rattacher (page pkgs/ du repo en 404).
+LABEL org.opencontainers.image.source=https://github.com/slabbdev/noirebox
 WORKDIR /srv
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
