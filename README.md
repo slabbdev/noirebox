@@ -326,6 +326,16 @@ local TSA (incl. the insider chain-regeneration attack)**, and the full
 third-party verifier contract. Everything replays locally: `make test`
 re-trains both language models and runs the full suite.
 
+**Consuming AI-agent decisions in your own pipeline?** Gate your builds on
+the integrity of the journal — the verifier ships as a GitHub Action
+([Marketplace](https://github.com/marketplace/actions/noirebox-verify)):
+
+```yaml
+- uses: slabbdev/noirebox-verify@v1
+  with:
+    export-path: export.json
+```
+
 ## Roadmap
 
 - [x] OAuth2 (JWT bearer) + rate limiting — [ADR 004](docs/ADRs.md)

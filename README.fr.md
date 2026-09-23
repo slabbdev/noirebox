@@ -332,6 +332,16 @@ locale (dont l'attaque de régénération par l'insider)**, et le contrat
 complet du vérificateur tiers. Tout se rejoue en local : `make test`
 ré-entraîne les deux modèles linguistiques et lance la suite complète.
 
+**Vous consommez des décisions d'agents IA dans votre pipeline ?** Verrouillez
+vos builds sur l'intégrité du journal — le vérificateur existe en GitHub
+Action ([Marketplace](https://github.com/marketplace/actions/noirebox-verify)) :
+
+```yaml
+- uses: slabbdev/noirebox-verify@v1
+  with:
+    export-path: export.json
+```
+
 ## Cas d'usage — n'importe quel agent qui « décide »
 
 | Agent | Ce que NoireBox apporte |
