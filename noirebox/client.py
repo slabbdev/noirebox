@@ -9,7 +9,11 @@ class NoireBoxError(RuntimeError):
 
 class NoireBoxClient:
     def __init__(self, base_url: str = "http://127.0.0.1:8768",
-                 timeout: float = 5.0, transport: httpx.BaseTransport | None = None):
+                 timeout: float = 15.0, transport: httpx.BaseTransport | None = None):
+        # 15 s par défaut : le PREMIER scan `engine: ml` charge le modèle à
+        # froid (qqes secondes, variable selon la machine et la version de
+        # Python — 3.14 trouvé par le test « stranger »). Les appels suivants
+        # réutilisent le modèle en mémoire et répondent en ms.
 
 
         self._http = httpx.Client(
