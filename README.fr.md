@@ -145,6 +145,9 @@ Vérifier une exportation comme un tiers (auditeur, DPO, client) :
 ```bash
 curl -s http://127.0.0.1:8768/api/v1/export > export.json
 .venv/bin/python verifier/verifier.py export.json   # exit 0 = chaîne intègre
+
+> Le vérificateur a besoin du paquet NoireBox sur la machine de l'auditeur —
+> `pip install noirebox` suffit (pas de modèle, pas de framework).
 ```
 
 ## Horodatage de la chaîne — le témoin extérieur (RFC 3161)

@@ -141,6 +141,9 @@ curl -s http://127.0.0.1:8768/api/v1/export > export.json
 .venv/bin/python verifier/verifier.py export.json   # exit 0 = chain intact
 ```
 
+> The verifier needs the NoireBox package on the auditing machine —
+> `pip install noirebox` is enough (no model, no framework).
+
 ## Chain timestamping — the outside witness (RFC 3161)
 
 The journal proves integrity, but *when* was it sealed? A server announcing
