@@ -138,11 +138,22 @@ def create_app(db_path: str | None = None) -> FastAPI:
 
         The source of truth remains the JSON (machine-readable); the PDF is
         the human version, with the verification procedure printed on it.
-        """
-        from .pdf_export import attestation_pdf
 
+        The PDF engine is an optional extra: without `noirebox[pdf]` the
+        route answers 501 with the install hint — never a traceback.
+        """
+        try:
+            from .pdf_export import attestation_pdf
+
+            content = attestation_pdf(store, key)
+        except RuntimeError as exc:
+            return Response(
+                content=f'{{"error": "{exc}"}}',
+                status_code=501,
+                media_type="application/json",
+            )
         return Response(
-            content=attestation_pdf(store, key),
+            content=content,
             media_type="application/pdf",
             headers={"Content-Disposition": 'attachment; filename="noirebox-attestation.pdf"'},
         )

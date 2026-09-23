@@ -113,8 +113,9 @@ Zéro ambiguïté sur ce qu'est le produit :
 ## Quickstart
 
 ```bash
-pip install noirebox   # le moteur ML est embarqué dans le wheel (FR + EN)
-noirebox serve         # API sur http://127.0.0.1:8768/docs
+pip install noirebox       # le moteur ML est embarqué dans le wheel (FR + EN)
+pip install noirebox[pdf]  # + l'attestation PDF prête pour le DPO (extra optionnel)
+noirebox serve             # API sur http://127.0.0.1:8768/docs
 ```
 
 Depuis les sources :

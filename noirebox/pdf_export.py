@@ -3,10 +3,6 @@ from __future__ import annotations
 import io
 from datetime import datetime, timezone
 
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
-from reportlab.pdfgen import canvas
-
 from .attestation import build_attestation
 from .chain import KeyPair
 from .store import EventStore
@@ -16,8 +12,28 @@ RED = (0.88, 0.02, 0.0)
 GREY = (0.45, 0.5, 0.55)
 
 
+def _reportlab():
+    """Imports reportlab lazily — the PDF is an optional extra (`noirebox[pdf]`).
+
+    Keeping reportlab out of the core install drops the heaviest dependency
+    from `pip install noirebox`; the DPO-ready PDF is a convenience layered
+    on top, and a missing extra is a clean error, not a traceback.
+    """
+    try:
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.units import mm
+        from reportlab.pdfgen import canvas
+    except ImportError as exc:
+        raise RuntimeError(
+            "PDF attestation requires the optional dependency reportlab — "
+            "install it with: pip install noirebox[pdf]"
+        ) from exc
+    return A4, mm, canvas
+
+
 def attestation_pdf(store: EventStore, key: KeyPair) -> bytes:
     """Builds the attestation PDF (bytes — FastAPI serves it as-is)."""
+    A4, mm, canvas = _reportlab()
     att = build_attestation(store, key)
     evidence_id = f"NBX-{att['head_hash'][:16].upper()}"
 

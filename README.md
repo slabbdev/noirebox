@@ -107,8 +107,9 @@ No ambiguity about what the product is:
 ## Quickstart
 
 ```bash
-pip install noirebox   # the ML engine ships inside the wheel (FR + EN)
-noirebox serve         # API on http://127.0.0.1:8768/docs
+pip install noirebox       # the ML engine ships inside the wheel (FR + EN)
+pip install noirebox[pdf]  # + the DPO-ready PDF attestation (optional extra)
+noirebox serve             # API on http://127.0.0.1:8768/docs
 ```
 
 From source:
