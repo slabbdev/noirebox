@@ -354,6 +354,10 @@ domaine = ajouter des exemples au dataset et relancer `make train`.
 - [x] **Ancrage de flotte (Merkle)** — `noirebox/merkle.py` : UN sceau TSA couvre
       N journaux (pattern Certificate Transparency) ; les preuves d'inclusion font
       ~log2(N) hash, vérifiables hors-ligne — voir `make demo-fleet`
+- [ ] **Plugin de réconciliation** — invariants sur le journal (« chaque décision
+      doit avoir une réponse ») : sketch du pattern two-events dans
+      [`demo/demo_payout.py`](demo/demo_payout.py) (`make demo-payout`),
+      discussion du schéma dans l'[issue #3](https://github.com/slabbdev/noirebox/issues/3)
 - [ ] Hub de flotte : agrégation programmée de N instances (console, alerting)
 - [ ] Rotation des ancres sur plusieurs TSA (distribuer la confiance)
 - [ ] LLM-juge local pour les cas douteux — étage 2 de l'[ADR 001](docs/ADRs.md)

@@ -1,5 +1,5 @@
 # NoireBox — shortcuts (make test, make demo, make serve…)
-.PHONY: install test serve demo demo-mcp demo-llm demo-fleet ollama-pull tsa dataset train train-en docker clean
+.PHONY: install test serve demo demo-mcp demo-llm demo-fleet demo-payout ollama-pull tsa dataset train train-en docker clean
 
 install:
 	python3 -m venv .venv
@@ -23,6 +23,9 @@ demo-llm:
 
 demo-fleet:
 	.venv/bin/python demo/demo_fleet.py
+
+demo-payout:
+	.venv/bin/python demo/demo_payout.py
 
 ollama-pull:
 	ollama pull qwen2.5:0.5b
