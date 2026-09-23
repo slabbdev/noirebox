@@ -4,6 +4,9 @@ FROM python:3.12-slim
 LABEL org.opencontainers.image.source=https://github.com/slabbdev/noirebox
 WORKDIR /srv
 COPY requirements.txt .
+# pip d'abord : l'emb pip 25.0.1 de la base traîne des CVE fixables —
+# et un rebuild régulier sur base fraîche purge les CVEs Debian (zlib, perl…).
+RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 COPY noirebox/ noirebox/
 COPY corpus/ corpus/
