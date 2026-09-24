@@ -335,7 +335,7 @@ exemples au dataset, puis `make train`. Architecture par étages :
 
 ## Tests
 
-91 tests : cryptographie (falsification, réordonnancement, mauvaise clé),
+107 tests : cryptographie (falsification, réordonnancement, mauvaise clé),
 garde-fou regex et **ML sur phrases inédites en FR et EN**, agent API,
 serveur MCP, SDK client contre un **vrai serveur uvicorn** (port éphémère),
 agent LLM réel (skip si Ollama absent — jamais simulé), **auth OAuth2 JWT +

@@ -329,7 +329,7 @@ examples, then `make train`.
 
 ## Tests
 
-91 tests: cryptography (tampering, reordering, wrong key), regex and **ML
+107 tests: cryptography (tampering, reordering, wrong key), regex and **ML
 guardrails on held-out sentences in FR and EN**, API agent, MCP server, SDK
 client against a **real uvicorn server** (ephemeral port), real LLM agent
 (skipped if Ollama is absent — never simulated), **OAuth2 JWT auth + rate

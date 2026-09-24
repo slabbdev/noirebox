@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NoireBox — Le boîtier de vol des agents IA</title>
 <meta name="description" content="Chaque décision de votre agent IA — scellée dans un journal infalsifiable, horodatée par un témoin externe, prouvable par n'importe qui. Sans faire confiance à personne.">
-<link rel="stylesheet" href="style.css?v=25">
+<link rel="stylesheet" href="style.css?v=26">
 </head>
 <body>
 
@@ -55,10 +55,10 @@
     </div>
 
     <ul class="stats">
-      <li><strong>91</strong><span>tests verts</span></li>
-      <li><strong>0</strong><span>dépendance runtime</span></li>
+      <li><strong>107</strong><span>tests verts</span></li>
+      <li><strong>1,8 Mo</strong><span>repo complet</span></li>
       <li><strong>0,21 ms</strong><span>par événement scellé</span></li>
-      <li><strong>1,5 Mo</strong><span>repo complet</span></li>
+      <li><strong>250 Ko</strong><span>détecteur par langue</span></li>
     </ul>
 
     <div class="install-pill">
@@ -204,7 +204,7 @@
       <tr><td>Vérification complète, 100 événements</td><td class="m-val">22 ms</td><td class="m-how">verifier/verifier.py, tout export</td></tr>
       <tr><td>Détecteurs embarqués, FR + EN</td><td class="m-val">293 + 243 Ko</td><td class="m-how">make train · make train-en</td></tr>
       <tr><td>Phrases d'attaque inédites, FR + EN</td><td class="m-val">12/12</td><td class="m-how">tests/test_ml_guardrail.py</td></tr>
-      <tr><td>Suite de tests</td><td class="m-val">91 verts</td><td class="m-how">make test</td></tr>
+      <tr><td>Suite de tests</td><td class="m-val">107 verts</td><td class="m-how">make test</td></tr>
     </table>
     <p class="note mono">Mesuré sur un MacBook M-series, septembre 2026. Un chiffre, une commande — si une version future ne reproduit pas un chiffre, la table est corrigée, pas gonflée.</p>
   </div>
@@ -340,6 +340,6 @@ $ python verifier/verifier.py export.json
   </div>
 </footer>
 
-<script src="script.js?v=25"></script>
+<script src="script.js?v=26"></script>
 </body>
 </html>
