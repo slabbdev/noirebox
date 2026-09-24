@@ -4,7 +4,7 @@
       "name": "every-decision-has-an-outcome",
       "decision_type": "policy_decision",
       "outcome_type": "provider_response",
-      "correlation_key": "payment_intent_id",
+      "correlation_key": "decision_id",
       "within": "5m"
     }
   ]

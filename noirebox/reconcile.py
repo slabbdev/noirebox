@@ -1,42 +1,48 @@
-"""Reconciliation plugin (v0) — business invariants over the journal.
+"""Reconciliation plugin (v0.1) — business invariants over the journal.
 
 The journal proves integrity and order. It deliberately does NOT know what a
 "missing half" is: that knowledge is domain-specific, and this plugin is where
 it lives — the same plugin pattern as the guardrail (journal domain-blind,
-domain knowledge pluggable). Community request: issue #3.
+domain knowledge pluggable). Community request: issue #3, schema refined by
+Axiru (payout side).
 
 The pattern it checks (two-event flow, e.g. payouts):
 
-    policy_decision (allow/hold/deny + reason_code + policy_version)
-    provider_response (provider status)
-    ... linked by a correlation key: payment_intent_id
+    policy_decision (allow/hold/deny + reason_code + policy_version
+                     + expected_by or expected_within)
+    provider_response (provider status, optional unauthorized flag)
+    ... linked by a correlation key: decision_id
 
-For each invariant, the checker pairs decision/outcome events by the
-correlation key and reports:
+Schema notes (from the Axiru review, v0.1):
 
-    matched          — both sealed (flagged `late` if the outcome lagged
-                       beyond the invariant's `within` window)
-    open_gap         — decision sealed, no outcome ever recorded
-                       (the process died before the provider call — the gap
-                       itself is evidence, not an error to hide)
-    orphan_outcome   — outcome sealed with no decision in front of it
-                       (a retry skipped the journaling step)
+1. **Correlate on a decision id, not the payment intent** — one intent can
+   produce several attempts, each with its own decision. Matching on the
+   intent would hide a second decision for the same intent.
+2. **A decision carries its deadline** — `expected_by` (absolute ISO) or
+   `expected_within` (duration from the decision timestamp). A decision
+   whose window passed with no outcome flips to `unconfirmed` — the gap is
+   flagged in real time, not discovered in hindsight. Without a deadline the
+   gap stays `open_gap` (visible only in hindsight).
+3. **An orphan outcome should carry an explicit flag** — `unauthorized: true`
+   in the outcome payload means "never authorized": auditors search for the
+   flag, they do not search for silence. Unflagged orphans stay inferred
+   (`orphan_outcome`).
 
 Every finding is evidence, not an action: the plugin never repairs, it
 reports. And the report is sealed into the journal like any event — the
 journal's auditor is audited by the journal it audits.
 
-v0 boundaries (feedback on issue #3 decides what comes next):
+v0.1 boundaries:
 - config is JSON (stdlib) — YAML would add a dependency for syntax
 - one correlation key per invariant, first event wins on duplicates
-- `within` supports "Ns", "Nm", "Nh" strings or plain seconds (int)
+- `now` is injectable for tests; defaults to the real clock
 """
 from __future__ import annotations
 
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 _DURATION = re.compile(r"^\s*(\d+)\s*([smh]?)\s*$", re.IGNORECASE)
 _UNITS = {"s": 1, "m": 60, "h": 3600}
@@ -55,10 +61,21 @@ class Invariant:
 
 @dataclass(frozen=True)
 class Finding:
-    """One reconciliation result — evidence sealed into the journal."""
+    """One reconciliation result — evidence sealed into the journal.
+
+    Statuses:
+        matched         — decision and outcome both sealed
+        late            — both sealed, but the outcome came after the deadline
+        pending         — decision sealed, window not passed yet, no outcome yet
+        unconfirmed     — decision sealed, deadline passed, no outcome
+        open_gap        — decision sealed with NO deadline at all
+        orphan_outcome  — outcome with no decision (inferred by absence)
+        unauthorized    — outcome explicitly flagged `unauthorized: true`
+                          ("never authorized" — auditors search for the flag)
+    """
 
     invariant: str
-    status: str                    # matched | open_gap | orphan_outcome | late
+    status: str
     correlation_id: str
     decision_seq: int | None = None
     outcome_seq: int | None = None
@@ -97,13 +114,32 @@ def _ts(event: dict) -> datetime:
     return datetime.fromisoformat(event["ts"])
 
 
-def reconcile(events: list[dict], invariants: list[Invariant]) -> list[Finding]:
+def _deadline(decision: dict, inv: Invariant) -> datetime | None:
+    """The per-event deadline from the decision: `expected_by` (absolute ISO)
+    wins over `expected_within` (duration from the decision timestamp); the
+    invariant's `within` is the last-resort fallback."""
+    payload = decision.get("payload", {})
+    if payload.get("expected_by"):
+        return datetime.fromisoformat(payload["expected_by"])
+    if payload.get("expected_within"):
+        return _ts(decision) + timedelta(
+            seconds=parse_duration(payload["expected_within"]) or 0
+        )
+    if inv.within_seconds is not None:
+        return _ts(decision) + timedelta(seconds=inv.within_seconds)
+    return None
+
+
+def reconcile(events: list[dict], invariants: list[Invariant],
+              now: datetime | None = None) -> list[Finding]:
     """Runs every invariant over the events, returns the findings.
 
     `events` is what `store.all()` returns — or any handcrafted list with
     the same shape (seq, ts, type, payload). First occurrence wins on
     duplicate correlation ids: the original decision, the first response.
+    `now` is the reference clock for deadline checks (injectable in tests).
     """
+    ref = now or datetime.now(timezone.utc)
     findings: list[Finding] = []
     for inv in invariants:
         decisions: dict[str, dict] = {}
@@ -121,17 +157,35 @@ def reconcile(events: list[dict], invariants: list[Invariant]) -> list[Finding]:
         for cid, decision in decisions.items():
             outcome = outcomes.get(cid)
             if outcome is None:
-                findings.append(Finding(inv.name, "open_gap", cid,
-                                        decision_seq=decision["seq"]))
-            elif inv.within_seconds is not None:
-                lag = (_ts(outcome) - _ts(decision)).total_seconds()
-                if lag > inv.within_seconds:
-                    findings.append(Finding(inv.name, "late", cid,
-                                            decision_seq=decision["seq"],
-                                            outcome_seq=outcome["seq"],
-                                            lag_seconds=lag))
+                deadline = _deadline(decision, inv)
+                if deadline is None:
+                    findings.append(Finding(inv.name, "open_gap", cid,
+                                            decision_seq=decision["seq"]))
+                elif ref > deadline:
+                    findings.append(Finding(inv.name, "unconfirmed", cid,
+                                            decision_seq=decision["seq"]))
+                else:
+                    findings.append(Finding(inv.name, "pending", cid,
+                                            decision_seq=decision["seq"]))
+                continue
+            lag = (_ts(outcome) - _ts(decision)).total_seconds()
+            if inv.within_seconds is not None and lag > inv.within_seconds:
+                findings.append(Finding(inv.name, "late", cid,
+                                        decision_seq=decision["seq"],
+                                        outcome_seq=outcome["seq"],
+                                        lag_seconds=lag))
+            else:
+                findings.append(Finding(inv.name, "matched", cid,
+                                        decision_seq=decision["seq"],
+                                        outcome_seq=outcome["seq"]))
+
         for cid, outcome in outcomes.items():
-            if cid not in decisions:
+            if cid in decisions:
+                continue
+            if outcome.get("payload", {}).get("unauthorized") is True:
+                findings.append(Finding(inv.name, "unauthorized", cid,
+                                        outcome_seq=outcome["seq"]))
+            else:
                 findings.append(Finding(inv.name, "orphan_outcome", cid,
                                         outcome_seq=outcome["seq"]))
     return findings
