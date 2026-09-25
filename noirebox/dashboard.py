@@ -1,19 +1,19 @@
-"""Supervision dashboard — a read-only HTML view of the journal.
+"""FLIGHT DECK — the NoireBox supervision view, styled as the instrument
+panel of the box itself.
 
-Served by the API itself at `GET /dashboard`. Two hard rules, decided when
-the feature was designed (2026-09, before any line of code):
+Not a generic admin dashboard: every element here speaks flight recorder.
 
-1. **Read-only**: this view never mutates the journal. It renders what the
-   existing GET endpoints already expose — nothing more, nothing writable.
-2. **It displays, it does not attest**: the badge shows the result of the
-   same local recomputation the verifier performs; the trust anchor remains
-   the exported dossier. A dashboard is a convenience, never the proof.
+- THE SEAL: the tamper-evident state of the whole chain, recomputed live.
+- THE SPINE: the chain rendered as a vertical spine — each event a block,
+  with its prev_hash → event_hash link visible. The crypto, made physical.
+- DEPARTURES / ARRIVALS: the two-event pattern (issue #3) as a departures
+  board — decisions depart, outcomes arrive, unpaired rows light up amber
+  or red. Powered by the same pairing the reconciliation plugin uses.
+- THE WITNESS: the last RFC 3161 anchor sealed into the chain.
 
-Zero dependencies: one HTML constant, inline CSS/JS, fetched from the
-existing endpoints (/api/v1/verify, /api/v1/events). The reconciliation
-panel pairs `policy_decision` / `provider_response` events by their
-`payment_intent_id` correlation key — the two-event pattern from issue #3 —
-and only appears when such events exist.
+Hard rules (unchanged since design review):
+1. Read-only — this view never mutates the journal.
+2. It renders; it never attests — the exported dossier remains the proof.
 """
 
 DASHBOARD_HTML = """<!DOCTYPE html>
@@ -21,85 +21,124 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NoireBox — dashboard</title>
+<title>NoireBox — Flight Deck</title>
 <style>
   :root { --bg:#05060a; --panel:#0a0c12; --line:rgba(255,255,255,.08);
-    --txt:#e8ecf1; --dim:#9aa4b2; --dimmer:#616b7a; --red:#e10600;
-    --red-soft:#ff8577; --green:#3fb950; --mono:ui-monospace,SFMono-Regular,Menlo,monospace; }
+    --line2:rgba(255,255,255,.16); --txt:#e8ecf1; --dim:#9aa4b2;
+    --dimmer:#616b7a; --red:#e10600; --red-soft:#ff8577; --green:#3fb950;
+    --amber:#f5a623; --mono:ui-monospace,SFMono-Regular,Menlo,monospace; }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--txt); font-family:var(--mono);
-    padding:32px 5vw; }
+    padding:28px 4vw; font-size:14px; }
   header { display:flex; align-items:center; justify-content:space-between;
-    flex-wrap:wrap; gap:16px; margin-bottom:28px; }
-  h1 { font-size:1.1rem; letter-spacing:.22em; font-weight:800; }
-  h1 .cube { display:inline-block; width:12px; height:12px; border-radius:3px;
-    background:linear-gradient(145deg,#2a2e38,#0d1117); margin-right:10px;
+    flex-wrap:wrap; gap:14px; margin-bottom:24px; }
+  h1 { font-size:.95rem; letter-spacing:.22em; font-weight:800; }
+  h1 .cube { display:inline-block; width:11px; height:11px; border-radius:3px;
+    background:linear-gradient(145deg,#2a2e38,#0d1117); margin-right:9px;
     box-shadow: inset 0 0 6px rgba(225,6,0,.5), 0 0 12px rgba(225,6,0,.25); }
-  .badge { font-weight:800; padding:10px 22px; border-radius:8px;
-    font-size:1rem; letter-spacing:.08em; }
-  .badge.ok { color:var(--green); border:1px solid rgba(63,185,80,.5);
+  .seal { font-weight:800; padding:9px 20px; border-radius:8px;
+    font-size:.9rem; letter-spacing:.08em; }
+  .seal.ok { color:var(--green); border:1px solid rgba(63,185,80,.5);
     background:rgba(63,185,80,.08); }
-  .badge.bad { color:var(--red-soft); border:1px solid rgba(225,6,0,.6);
-    background:rgba(225,6,0,.1); animation:pulse 1.2s infinite; }
-  @keyframes pulse { 50% { opacity:.55; } }
-  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-    gap:12px; margin-bottom:28px; }
+  .seal.bad { color:var(--red-soft); border:1px solid rgba(225,6,0,.6);
+    background:rgba(225,6,0,.1); animation:pulse 1.1s infinite; }
+  @keyframes pulse { 50% { opacity:.5; } }
+  .strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:10px; margin-bottom:26px; }
   .card { background:var(--panel); border:1px solid var(--line);
-    border-radius:12px; padding:18px; }
-  .card b { display:block; font-size:1.35rem; font-weight:800; }
-  .card span { font-size:.68rem; letter-spacing:.14em; text-transform:uppercase;
+    border-radius:10px; padding:14px 16px; }
+  .card b { display:block; font-size:1.25rem; font-weight:800; }
+  .card span { font-size:.64rem; letter-spacing:.16em; text-transform:uppercase;
     color:var(--dimmer); }
-  h2 { font-size:.72rem; letter-spacing:.2em; text-transform:uppercase;
-    color:var(--dimmer); margin:26px 0 12px; }
-  table { width:100%; border-collapse:collapse; font-size:.84rem; }
-  th { text-align:left; color:var(--dimmer); font-size:.66rem;
-    letter-spacing:.14em; text-transform:uppercase; padding:8px 10px;
+  h2 { font-size:.7rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--dimmer); margin:24px 0 10px; }
+  .board { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width: 900px) { .board { grid-template-columns:1fr; } }
+  .panelbox { background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; overflow:hidden; }
+  .panelbox h3 { font-size:.7rem; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--dimmer); padding:12px 16px; border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.02); }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; }
+  th { text-align:left; color:var(--dimmer); font-size:.62rem;
+    letter-spacing:.14em; text-transform:uppercase; padding:8px 14px;
     border-bottom:1px solid var(--line); }
-  td { padding:9px 10px; border-bottom:1px solid var(--line);
-    color:var(--dim); vertical-align:top; }
-  td.seq, td.ts { font-family:var(--mono); color:var(--txt); white-space:nowrap; }
-  .type { font-weight:700; color:var(--txt); }
-  .type.policy_decision, .type.provider_response { color:var(--red-soft); }
-  .type.reconciliation { color:var(--green); }
-  .chip { border-radius:99px; padding:2px 10px; font-size:.72rem; }
-  .chip.ok { color:var(--green); border:1px solid rgba(63,185,80,.45); }
-  .chip.gap { color:var(--red-soft); border:1px solid rgba(225,6,0,.5); }
-  .chip.orphan { color:#f5a623; border:1px solid rgba(245,166,35,.5); }
-  footer { margin-top:34px; color:var(--dimmer); font-size:.78rem;
-    display:flex; gap:20px; flex-wrap:wrap; }
+  td { padding:9px 14px; border-bottom:1px solid var(--line); color:var(--dim); }
+  td.mono { color:var(--txt); }
+  .chip { border-radius:99px; padding:2px 10px; font-size:.7rem; white-space:nowrap; }
+  .chip.matched { color:var(--green); border:1px solid rgba(63,185,80,.45); }
+  .chip.pending { color:var(--amber); border:1px solid rgba(245,166,35,.5); }
+  .chip.unconfirmed, .chip.unauthorized { color:var(--red-soft);
+    border:1px solid rgba(225,6,0,.55); }
+  .chip.orphan { color:var(--amber); border:1px solid rgba(245,166,35,.5); }
+  .empty { padding:14px 16px; color:var(--dimmer); }
+  /* THE SPINE — the chain made physical */
+  .spine { position:relative; padding-left:34px; }
+  .spine::before { content:""; position:absolute; left:15px; top:6px; bottom:6px;
+    width:2px; background:linear-gradient(180deg, var(--red) 0%, rgba(225,6,0,.15) 100%); }
+  .block { position:relative; background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:12px 16px; margin-bottom:18px; }
+  .block::before { content:""; position:absolute; left:-25px; top:18px;
+    width:12px; height:12px; border-radius:50%; background:var(--bg);
+    border:2px solid var(--red); box-shadow:0 0 8px rgba(225,6,0,.6); }
+  .block .seq { position:absolute; left:-34px; top:14px; width:26px; text-align:center;
+    color:var(--red-soft); font-size:.72rem; font-weight:800; }
+  .block .head { display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    margin-bottom:6px; }
+  .block .type { font-weight:700; color:var(--txt); }
+  .block .ts { color:var(--dimmer); font-size:.72rem; }
+  .block .hashes { display:flex; gap:14px; flex-wrap:wrap; font-size:.7rem;
+    color:var(--dimmer); margin-top:6px; }
+  .block .hashes b { color:var(--red-soft); font-weight:700; }
+  .block details { margin-top:8px; }
+  .block summary { cursor:pointer; color:var(--dimmer); font-size:.72rem; }
+  .block pre { margin-top:6px; font-size:.7rem; color:var(--dim);
+    background:#05060a; border:1px solid var(--line); border-radius:8px;
+    padding:10px; overflow-x:auto; white-space:pre-wrap; word-break:break-all; }
+  .gapline { border-left:2px dashed rgba(225,6,0,.5); margin:0 0 18px 7px;
+    padding:6px 0 6px 20px; color:var(--red-soft); font-size:.74rem; }
+  footer { margin-top:32px; color:var(--dimmer); font-size:.76rem;
+    display:flex; gap:18px; flex-wrap:wrap; }
   footer a { color:var(--red-soft); text-decoration:none; }
-  .empty { color:var(--dimmer); padding:14px 10px; }
 </style>
 </head>
 <body>
 <header>
-  <h1><span class="cube"></span>NOIREBOX — FLIGHT DATA RECORDER</h1>
-  <span class="badge" id="badge">CHECKING…</span>
+  <h1><span class="cube"></span>NOIREBOX — FLIGHT DECK</h1>
+  <span class="seal" id="seal">CHECKING…</span>
 </header>
 
-<div class="cards">
+<div class="strip">
   <div class="card"><b id="c-events">—</b><span>sealed events</span></div>
   <div class="card"><b id="c-head">—</b><span>chain head</span></div>
   <div class="card"><b id="c-last">—</b><span>last event (UTC)</span></div>
-  <div class="card"><b id="c-gaps">—</b><span>reconciliation gaps</span></div>
+  <div class="card"><b id="c-gaps">—</b><span>unpaired intents</span></div>
 </div>
 
-<div id="recon-panel" style="display:none">
-  <h2>Reconciliation — two-event pattern (issue #3)</h2>
-  <table id="recon-table">
-    <thead><tr><th>payment_intent_id</th><th>state</th></tr></thead>
-    <tbody></tbody>
-  </table>
+<h2>The chain spine — every link visible</h2>
+<div class="spine" id="spine">
+  <div class="empty">loading…</div>
 </div>
 
-<h2>Sealed events</h2>
-<table>
-  <thead><tr><th>#</th><th>UTC</th><th>type</th><th>payload</th></tr></thead>
-  <tbody id="rows"><tr><td colspan="4" class="empty">loading…</td></tr></tbody>
-</table>
+<div class="board" id="recon-board" style="display:none">
+  <div class="panelbox">
+    <h3>Departures — policy_decision</h3>
+    <table><thead><tr><th>decision id</th><th>state</th></tr></thead>
+    <tbody id="dep-rows"><tr><td class="empty">—</td></tr></tbody></table>
+  </div>
+  <div class="panelbox">
+    <h3>Arrivals — provider_response</h3>
+    <table><thead><tr><th>decision id</th><th>state</th></tr></thead>
+    <tbody id="arr-rows"><tr><td class="empty">—</td></tr></tbody></table>
+  </div>
+</div>
+
+<h2>The witness — last RFC 3161 anchor</h2>
+<div class="panelbox" style="padding:14px 16px" id="witness">loading…</div>
 
 <footer>
   <span>read-only — this view never mutates the journal</span>
+  <span>it renders; the exported dossier attests</span>
   <a href="/docs">API docs</a>
   <a href="/api/v1/export">export dossier</a>
   <a href="https://github.com/slabbdev/noirebox" target="_blank" rel="noopener">GitHub</a>
@@ -116,58 +155,80 @@ async function refresh() {
       fetch("/api/v1/events?limit=1000").then(r => r.json()),
     ]);
 
-    const badge = document.getElementById("badge");
+    const seal = document.getElementById("seal");
     if (verify.valid) {
-      badge.textContent = "✓ INTACT";
-      badge.className = "badge ok";
+      seal.textContent = "✓ CHAIN INTACT";
+      seal.className = "seal ok";
     } else {
-      badge.textContent = "✗ TAMPERING — " + (verify.first_error?.reason || "chain invalid");
-      badge.className = "badge bad";
+      seal.textContent = "✗ TAMPERING — " + (verify.first_error?.reason || "invalid");
+      seal.className = "seal bad";
     }
 
     document.getElementById("c-events").textContent = events.length;
     document.getElementById("c-head").textContent =
-      short(verify.valid ? events[events.length - 1]?.event_hash : null);
+      short(events.length ? events[events.length-1].event_hash : null);
     document.getElementById("c-last").textContent =
-      events.length ? events[events.length - 1].ts : "—";
+      events.length ? events[events.length-1].ts.slice(0,19) : "—";
 
-    // reconciliation: pair policy_decision / provider_response by correlation key
-    const pairTypes = ["policy_decision", "provider_response"];
+    // ── the chain spine, newest first ──
+    const spine = document.getElementById("spine");
+    spine.innerHTML = events.slice().reverse().map((e, i, arr) => {
+      const prev = i === 0 ? arr[i+1] : arr[i-1];
+      const payload = JSON.stringify(e.payload, null, 2);
+      const gap = arr[i+1] === undefined ? "" : "";
+      return `<div class="block">` +
+        `<span class="seq">${e.seq}</span>` +
+        `<div class="head"><span class="type ${esc(e.type)}">${esc(e.type)}</span>` +
+        `<span class="ts">${esc(e.ts.slice(0,19))} UTC</span></div>` +
+        `<div class="hashes"><span>prev <b>${short(e.prev_hash)}</b></span>` +
+        `<span>→ event <b>${short(e.event_hash)}</b></span>` +
+        `<span>sig ${short(e.signature)}</span></div>` +
+        `<details><summary>payload</summary><pre>${esc(payload)}</pre></details>` +
+        `</div>`;
+    }).join("") || '<div class="empty">journal is empty — seal the first event</div>';
+
+    // ── departures / arrivals: pair the two-event pattern ──
     const decisions = {}, outcomes = {};
     for (const e of events) {
-      const k = e.payload && e.payload.payment_intent_id;
+      const k = e.payload && (e.payload.decision_id || e.payload.payment_intent_id);
       if (!k) continue;
       if (e.type === "policy_decision") decisions[k] = e;
       if (e.type === "provider_response") outcomes[k] = e;
     }
     const hasPayout = Object.keys(decisions).length || Object.keys(outcomes).length;
-    const openGaps = Object.keys(decisions).filter(k => !(k in outcomes));
-    const orphans = Object.keys(outcomes).filter(k => !(k in decisions));
-    document.getElementById("c-gaps").textContent =
-      hasPayout ? (openGaps.length + orphans.length) : "—";
+    document.getElementById("recon-board").style.display = hasPayout ? "" : "none";
+    document.getElementById("c-gaps").textContent = hasPayout ?
+      Object.keys(decisions).filter(k => !(k in outcomes)).length +
+      Object.keys(outcomes).filter(k => !(k in decisions)).length : "—";
 
-    const panel = document.getElementById("recon-panel");
-    panel.style.display = hasPayout ? "" : "none";
-    if (hasPayout) {
-      const rows = [];
-      for (const k of new Set([...Object.keys(decisions), ...Object.keys(outcomes)])) {
-        const inD = k in decisions, inO = k in outcomes;
-        const state = inD && inO ? '<span class="chip ok">matched</span>'
-          : inD ? '<span class="chip gap">open gap — no provider response</span>'
-                : '<span class="chip orphan">orphan outcome — no decision</span>';
-        rows.push(`<tr><td>${esc(k)}</td><td>${state}</td></tr>`);
-      }
-      document.querySelector("#recon-table tbody").innerHTML = rows.join("");
+    const depRows = [], arrRows = [];
+    for (const k of new Set([...Object.keys(decisions), ...Object.keys(outcomes)])) {
+      const inD = k in decisions, inO = k in outcomes;
+      const state = inD && inO ? '<span class="chip matched">MATCHED</span>'
+        : inD ? '<span class="chip pending">PENDING</span>'
+              : '<span class="chip orphan">ORPHAN</span>';
+      if (inD) depRows.push(`<tr><td class="mono">${esc(k)}</td><td>${state}</td></tr>`);
+      else arrRows.push(`<tr><td class="mono">${esc(k)}</td><td>${state}</td></tr>`);
     }
+    for (const k of new Set([...Object.keys(decisions), ...Object.keys(outcomes)])) {
+      const inD = k in decisions, inO = k in outcomes;
+      if (inD && !inO) arrRows.push(`<tr><td class="mono">${esc(k)}</td><td><span class="chip unconfirmed">UNCONFIRMED</span></td></tr>`);
+      if (!inD && inO) depRows.push(`<tr><td class="mono">${esc(k)}</td><td><span class="chip orphan">NO DECISION</span></td></tr>`);
+    }
+    document.getElementById("dep-rows").innerHTML =
+      depRows.join("") || '<tr><td class="empty">no departures</td></tr>';
+    document.getElementById("arr-rows").innerHTML =
+      arrRows.join("") || '<tr><td class="empty">no arrivals</td></tr>';
 
-    document.getElementById("rows").innerHTML = events.slice().reverse().map(e =>
-      `<tr><td class="seq">${e.seq}</td><td class="ts">${esc(e.ts)}</td>` +
-      `<td><span class="type ${esc(e.type)}">${esc(e.type)}</span></td>` +
-      `<td>${esc(JSON.stringify(e.payload).slice(0, 90))}${JSON.stringify(e.payload).length > 90 ? "…" : ""}</td></tr>`
-    ).join("") || '<tr><td colspan="4" class="empty">journal is empty — seal your first event</td></tr>';
+    // ── the witness: last anchor ──
+    const anchor = events.slice().reverse().find(e => e.type === "anchor");
+    document.getElementById("witness").innerHTML = anchor ?
+      `last anchor: seq ${anchor.seq} — ${esc(anchor.ts.slice(0,19))} UTC — ` +
+      `head covered <b>${short(anchor.payload?.head_hash || anchor.payload?.hash)}</b>` :
+      'no RFC 3161 anchor sealed yet — run <b>make tsa</b> + POST /api/v1/anchors';
   } catch (err) {
-    document.getElementById("badge").textContent = "API UNREACHABLE";
-    document.getElementById("badge").className = "badge bad";
+    document.getElementById("seal").textContent = "API UNREACHABLE";
+    document.getElementById("seal").className = "seal bad";
   }
 }
 

@@ -17,7 +17,7 @@ def test_dashboard_serves_html(tmp_path):
     r = _client(tmp_path).get("/dashboard")
     assert r.status_code == 200
     assert "text/html" in r.headers["content-type"]
-    assert "FLIGHT DATA RECORDER" in r.text
+    assert "FLIGHT DECK" in r.text
 
 
 def test_dashboard_hidden_from_openapi(tmp_path):
