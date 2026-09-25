@@ -207,10 +207,12 @@ function setView(v) {
 
 async function refresh() {
   try {
-    const [verify, events] = await Promise.all([
-      fetch("/api/v1/verify").then(r => r.json()),
-      fetch("/api/v1/events?limit=1000").then(r => r.json()),
-    ]);
+    const verify = await fetch("/api/v1/verify").then(r => r.json());
+    // à l'échelle : fetcher la FIN du journal (les événements les plus récents),
+    // pas le début — un dashboard qui rate les derniers événements est un bug.
+    const offset = Math.max(0, verify.nb_events - 1000);
+    const events = await fetch(`/api/v1/events?limit=1000&offset=${offset}`)
+      .then(r => r.json());
 
     const seal = document.getElementById("seal");
     if (verify.valid) {
