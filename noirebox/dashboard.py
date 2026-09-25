@@ -1,15 +1,18 @@
 """FLIGHT DECK — the NoireBox supervision view, styled as the instrument
-panel of the box itself.
+panel of the box itself. Three switchable views, one journal:
 
-Not a generic admin dashboard: every element here speaks flight recorder.
+- **DECK** (default): the chain as a vertical spine — every link visible,
+  prev_hash → event_hash → signature on each block.
+- **VAULT**: the same events as sealed envelopes — payload behind an
+  unseal toggle, signature rendered as a wax seal.
+- **TAPE**: the journal as a horizontal ticker-tape readout, like the
+  film-to-paper playbacks of early flight recorders.
 
-- THE SEAL: the tamper-evident state of the whole chain, recomputed live.
-- THE SPINE: the chain rendered as a vertical spine — each event a block,
-  with its prev_hash → event_hash link visible. The crypto, made physical.
-- DEPARTURES / ARRIVALS: the two-event pattern (issue #3) as a departures
-  board — decisions depart, outcomes arrive, unpaired rows light up amber
-  or red. Powered by the same pairing the reconciliation plugin uses.
-- THE WITNESS: the last RFC 3161 anchor sealed into the chain.
+Plus the DEPARTURES / ARRIVALS board: the two-event pattern (issue #3) —
+decisions depart, outcomes arrive, unpaired rows light up. And THE WITNESS:
+the last RFC 3161 anchor sealed into the chain.
+
+Not a generic admin dashboard: every element speaks flight recorder.
 
 Hard rules (unchanged since design review):
 1. Read-only — this view never mutates the journal.
@@ -43,6 +46,12 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   .seal.bad { color:var(--red-soft); border:1px solid rgba(225,6,0,.6);
     background:rgba(225,6,0,.1); animation:pulse 1.1s infinite; }
   @keyframes pulse { 50% { opacity:.5; } }
+  .viewbtns { display:flex; gap:6px; margin-bottom:22px; }
+  .viewbtn { font-family:var(--mono); font-size:.72rem; letter-spacing:.14em;
+    padding:7px 16px; border-radius:8px; cursor:pointer;
+    background:var(--panel); color:var(--dimmer); border:1px solid var(--line); }
+  .viewbtn.on { color:var(--txt); border-color:var(--red-soft);
+    background:rgba(225,6,0,.08); }
   .strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
     gap:10px; margin-bottom:26px; }
   .card { background:var(--panel); border:1px solid var(--line);
@@ -72,7 +81,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     border:1px solid rgba(225,6,0,.55); }
   .chip.orphan { color:var(--amber); border:1px solid rgba(245,166,35,.5); }
   .empty { padding:14px 16px; color:var(--dimmer); }
-  /* THE SPINE — the chain made physical */
+  /* ── DECK view: the vertical spine ── */
   .spine { position:relative; padding-left:34px; }
   .spine::before { content:""; position:absolute; left:15px; top:6px; bottom:6px;
     width:2px; background:linear-gradient(180deg, var(--red) 0%, rgba(225,6,0,.15) 100%); }
@@ -95,18 +104,46 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   .block pre { margin-top:6px; font-size:.7rem; color:var(--dim);
     background:#05060a; border:1px solid var(--line); border-radius:8px;
     padding:10px; overflow-x:auto; white-space:pre-wrap; word-break:break-all; }
-  .gapline { border-left:2px dashed rgba(225,6,0,.5); margin:0 0 18px 7px;
-    padding:6px 0 6px 20px; color:var(--red-soft); font-size:.74rem; }
+  /* ── VAULT view: sealed envelopes ── */
+  body.view-vault .spine { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:16px; padding-left:0; }
+  body.view-vault .spine::before { display:none; }
+  body.view-vault .block { padding:18px; border-radius:14px;
+    border:1px solid rgba(245,166,35,.35);
+    background:linear-gradient(160deg, var(--panel) 60%, rgba(245,166,35,.05)); }
+  body.view-vault .block::before { display:none; }
+  body.view-vault .block .seq { position:static; text-align:left; display:block;
+    color:var(--amber); margin-bottom:8px; font-size:.7rem; letter-spacing:.14em; }
+  body.view-vault .block .sealchip { display:inline-block; width:34px; height:34px;
+    border-radius:50%; border:2px solid var(--amber); color:var(--amber);
+    text-align:center; line-height:30px; font-weight:800; margin-left:10px; }
+  body.view-vault .block details[open] summary { color:var(--amber); }
+  /* ── TAPE view: horizontal ticker readout ── */
+  body.view-tape .spine { display:flex; gap:10px; overflow-x:auto;
+    padding:10px 4px 18px; align-items:stretch; }
+  body.view-tape .spine::before { display:none; }
+  body.view-tape .block { min-width:330px; max-width:330px; flex-shrink:0;
+    margin-bottom:0; border-radius:6px; }
+  body.view-tape .block::before { display:none; }
+  body.view-tape .block .seq { position:static; text-align:left; display:block;
+    color:var(--red-soft); margin-bottom:6px; }
+  body.view-tape .block pre { max-height:110px; overflow:hidden; }
   footer { margin-top:32px; color:var(--dimmer); font-size:.76rem;
     display:flex; gap:18px; flex-wrap:wrap; }
   footer a { color:var(--red-soft); text-decoration:none; }
 </style>
 </head>
-<body>
+<body class="view-deck">
 <header>
   <h1><span class="cube"></span>NOIREBOX — FLIGHT DECK</h1>
   <span class="seal" id="seal">CHECKING…</span>
 </header>
+
+<div class="viewbtns">
+  <button class="viewbtn on" data-v="deck" onclick="setView('deck')">DECK</button>
+  <button class="viewbtn" data-v="vault" onclick="setView('vault')">VAULT</button>
+  <button class="viewbtn" data-v="tape" onclick="setView('tape')">TAPE</button>
+</div>
 
 <div class="strip">
   <div class="card"><b id="c-events">—</b><span>sealed events</span></div>
@@ -115,7 +152,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   <div class="card"><b id="c-gaps">—</b><span>unpaired intents</span></div>
 </div>
 
-<h2>The chain spine — every link visible</h2>
+<h2>The chain — every link visible</h2>
 <div class="spine" id="spine">
   <div class="empty">loading…</div>
 </div>
@@ -148,6 +185,20 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const short = h => h ? h.slice(0,10) + "…" : "—";
 
+function setView(v) {
+  document.body.className = "view-" + v;
+  try { localStorage.setItem("fd-view", v); } catch (e) {}
+  document.querySelectorAll(".viewbtn").forEach(b =>
+    b.classList.toggle("on", b.dataset.v === v));
+}
+(function () {
+  let saved = "deck";
+  try { saved = localStorage.getItem("fd-view") || "deck"; } catch (e) {}
+  document.body.className = "view-" + saved;
+  document.querySelectorAll(".viewbtn").forEach(b =>
+    b.classList.toggle("on", b.dataset.v === saved));
+})();
+
 async function refresh() {
   try {
     const [verify, events] = await Promise.all([
@@ -170,14 +221,13 @@ async function refresh() {
     document.getElementById("c-last").textContent =
       events.length ? events[events.length-1].ts.slice(0,19) : "—";
 
-    // ── the chain spine, newest first ──
+    // ── the chain, newest first ──
     const spine = document.getElementById("spine");
-    spine.innerHTML = events.slice().reverse().map((e, i, arr) => {
-      const prev = i === 0 ? arr[i+1] : arr[i-1];
+    spine.innerHTML = events.slice().reverse().map(e => {
       const payload = JSON.stringify(e.payload, null, 2);
-      const gap = arr[i+1] === undefined ? "" : "";
       return `<div class="block">` +
-        `<span class="seq">${e.seq}</span>` +
+        `<span class="seq">SEQ ${e.seq}</span>` +
+        `<span class="sealchip">✓</span>` +
         `<div class="head"><span class="type ${esc(e.type)}">${esc(e.type)}</span>` +
         `<span class="ts">${esc(e.ts.slice(0,19))} UTC</span></div>` +
         `<div class="hashes"><span>prev <b>${short(e.prev_hash)}</b></span>` +
@@ -208,12 +258,15 @@ async function refresh() {
         : inD ? '<span class="chip pending">PENDING</span>'
               : '<span class="chip orphan">ORPHAN</span>';
       if (inD) depRows.push(`<tr><td class="mono">${esc(k)}</td><td>${state}</td></tr>`);
-      else arrRows.push(`<tr><td class="mono">${esc(k)}</td><td>${state}</td></tr>`);
+      if (inO) arrRows.push(`<tr><td class="mono">${esc(k)}</td><td>${state}</td></tr>`);
     }
-    for (const k of new Set([...Object.keys(decisions), ...Object.keys(outcomes)])) {
-      const inD = k in decisions, inO = k in outcomes;
-      if (inD && !inO) arrRows.push(`<tr><td class="mono">${esc(k)}</td><td><span class="chip unconfirmed">UNCONFIRMED</span></td></tr>`);
-      if (!inD && inO) depRows.push(`<tr><td class="mono">${esc(k)}</td><td><span class="chip orphan">NO DECISION</span></td></tr>`);
+    for (const k of Object.keys(decisions)) {
+      if (!(k in outcomes)) {
+        depRows.push(`<tr><td class="mono">${esc(k)}</td>` +
+          `<td><span class="chip unconfirmed">UNCONFIRMED</span></td></tr>`);
+        arrRows.push(`<tr><td class="mono">${esc(k)}</td>` +
+          `<td><span class="chip unconfirmed">UNCONFIRMED</span></td></tr>`);
+      }
     }
     document.getElementById("dep-rows").innerHTML =
       depRows.join("") || '<tr><td class="empty">no departures</td></tr>';
