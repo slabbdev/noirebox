@@ -90,8 +90,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   .block::before { content:""; position:absolute; left:-25px; top:18px;
     width:12px; height:12px; border-radius:50%; background:var(--bg);
     border:2px solid var(--red); box-shadow:0 0 8px rgba(225,6,0,.6); }
-  .block .seq { position:absolute; left:-34px; top:14px; width:26px; text-align:center;
-    color:var(--red-soft); font-size:.72rem; font-weight:800; }
+  .block .seq { display:block; font-size:.66rem; color:var(--red-soft);
+    letter-spacing:.12em; margin-bottom:4px; }
   .block .head { display:flex; gap:10px; flex-wrap:wrap; align-items:center;
     margin-bottom:6px; }
   .block .type { font-weight:700; color:var(--txt); }
@@ -99,6 +99,12 @@ DASHBOARD_HTML = """<!DOCTYPE html>
   .block .hashes { display:flex; gap:14px; flex-wrap:wrap; font-size:.7rem;
     color:var(--dimmer); margin-top:6px; }
   .block .hashes b { color:var(--red-soft); font-weight:700; }
+  .sealchip { display:none; }
+  body.view-vault .block .head .sealchip {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:30px; height:30px; border-radius:50%; flex-shrink:0;
+    border:2px solid var(--amber); color:var(--amber);
+    font-weight:800; font-size:.8rem; margin-right:6px; }
   .block details { margin-top:8px; }
   .block summary { cursor:pointer; color:var(--dimmer); font-size:.72rem; }
   .block pre { margin-top:6px; font-size:.7rem; color:var(--dim);
@@ -227,8 +233,8 @@ async function refresh() {
       const payload = JSON.stringify(e.payload, null, 2);
       return `<div class="block">` +
         `<span class="seq">SEQ ${e.seq}</span>` +
-        `<span class="sealchip">✓</span>` +
-        `<div class="head"><span class="type ${esc(e.type)}">${esc(e.type)}</span>` +
+        `<div class="head"><span class="sealchip">✓</span>` +
+        `<span class="type ${esc(e.type)}">${esc(e.type)}</span>` +
         `<span class="ts">${esc(e.ts.slice(0,19))} UTC</span></div>` +
         `<div class="hashes"><span>prev <b>${short(e.prev_hash)}</b></span>` +
         `<span>→ event <b>${short(e.event_hash)}</b></span>` +
