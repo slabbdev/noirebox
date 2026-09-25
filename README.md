@@ -357,10 +357,11 @@ the integrity of the journal — the verifier ships as a GitHub Action
 - [x] **Fleet anchoring (Merkle)** — `noirebox/merkle.py`: one TSA seal covers
       N journals (Certificate-Transparency pattern); inclusion proofs are
       ~log2(N) hashes, verified offline — see `make demo-fleet`
-- [ ] **Reconciliation plugin** — invariants over the journal ("every decision
-      must have an outcome"): two-event pattern sketch in
-      [`demo/demo_payout.py`](demo/demo_payout.py) (`make demo-payout`),
-      schema discussion in [issue #3](https://github.com/slabbdev/noirebox/issues/3)
+- [x] **Reconciliation plugin v0** — invariants over the journal ("every decision
+      must have an outcome"): `noirebox/reconcile.py` + CLI
+      `noirebox reconcile --fail-on-findings`, schema from
+      [issue #3](https://github.com/slabbdev/noirebox/issues/3) (community
+      request), pattern sketch in [`demo/demo_payout.py`](demo/demo_payout.py)
 - [ ] Fleet hub: scheduled aggregation of many instances (console, alerting)
 - [ ] Rotate TSA anchors across multiple authorities (distribute trust)
 - [ ] Prometheus + Grafana metrics
