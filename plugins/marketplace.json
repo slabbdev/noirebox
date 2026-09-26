@@ -1,0 +1,22 @@
+{
+  "name": "dev-noirebox",
+  "owner": {
+    "name": "slabbdev"
+  },
+  "plugins": [
+    {
+      "name": "noirebox",
+      "source": "./noirebox",
+      "version": "0.1.1",
+      "description": "NoireBox inside ZCode: seal every agent decision in the tamper-evident Ed25519 journal, screen texts through the FR/EN injection guardrail, verify the hash chain and export signed attestations.",
+      "displayName": "NoireBox",
+      "displayName_i18n": {
+        "fr-FR": "NoireBox"
+      },
+      "description_i18n": {
+        "fr-FR": "NoireBox dans ZCode : journal inaltérable des décisions de l'agent, garde-fou anti-injection FR/EN, vérification de chaîne et attestations signées — outils MCP, scellement automatique des actions, skill de démo."
+      },
+      "category": "developer-tools"
+    }
+  ]
+}
