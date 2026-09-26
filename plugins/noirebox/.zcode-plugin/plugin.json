@@ -1,15 +1,19 @@
 {
   "name": "noirebox",
-  "version": "0.1.1",
+  "version": "0.5.0",
   "description": "NoireBox inside ZCode: seal every agent decision in the tamper-evident Ed25519 journal, screen texts through the FR/EN injection guardrail, verify the hash chain and export signed attestations.",
-  "author": { "name": "slabbdev" },
+  "author": {
+    "name": "slabbdev"
+  },
   "skills": "./skills",
   "commands": "./commands",
   "hooks": "./hooks/hooks.json",
   "mcpServers": {
     "noirebox": {
       "command": "sh",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/launch.sh"]
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/launch.sh"
+      ]
     }
   }
 }
